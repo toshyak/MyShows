@@ -2,8 +2,10 @@
 # -*- coding: utf-8 -*-
 
 import urllib2, cookielib
+from xml.etree.ElementTree import Element, SubElement, tostring
 from hashlib import md5
 import json
+from xml.dom import minidom
 
 my_password='xJ":vQ"&%`f!w@T/rixb@q,1l'
 username = 'Toshyak'
@@ -17,7 +19,7 @@ def open_connection():
 	auth = opener.open("http://api.myshows.ru/profile/login?login=%(login)s&password=%(passwd)s " % \
 		{"login":username, "passwd": my_password_md5.hexdigest()} )
 
-	print auth.getcode() #надо бы его тоже возвращать
+	# print auth.getcode() #надо бы его тоже возвращать
 
 	return opener
 
@@ -37,9 +39,33 @@ def shows_list(connection):
 # for index, cookie in enumerate(cj):
 #         print index, '  :  ', cookie
 
-
-
 connection = open_connection()
+items = Element('items')
 for i in shows_list(connection):
-	print i.encode('utf-8')
+	item = SubElement(items, "item", {'arg': i, "valid":"no", "autocomplete":i, "type":"default"})
+	title = SubElement(item, "title")
+	title.text = i
+	subtitle = SubElement(item, "subtitle")
+	subtitle.text = i
+	icon = SubElement(item, "icon")
+	icon.text = "myshows.ico"
+
+print tostring(items, 'utf-8') 
+
+
+# print """
+# <?xml version="1.0"?>
+#     <items>
+#         <item arg="The Simpsons" valid="no" autocomplete="The Simpsons" type="default">
+#             <title>The Simpsons</title>
+#             <subtitle>Симпсоны</subtitle>
+#             <icon type="fileicon">~/Desktop</icon>
+#         </item>
+#         <item arg="Futurama" valid="no" autocomplete="Futurama" type="default">
+#             <title>Futurama</title>
+#             <subtitle>Футурама</subtitle>
+#             <icon type="fileicon">~/Desktop</icon>
+#         </item>
+#     </items>
+# """
 
