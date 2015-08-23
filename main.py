@@ -8,16 +8,16 @@ import json
 from xml.dom import minidom
 import datetime
 
-#TODO 
+#TODO список файлов для сериала, его сортировка, возврат отсортированных непросмотренных серий
 
+#my_password=''
+#username = 'Toshyak'
+#now read login and password from separate file 'key', add it to .gitignore
 
-my_password='xJ":vQ"&%`f!w@T/rixb@q,1l'
-username = 'Toshyak'
 
 user_input = ""
-
-my_password_md5 = md5(my_password)
-
+username = ""
+password = ""
 shows_list = []
 
 class Show(object):
@@ -37,12 +37,13 @@ class Show(object):
 	def set_lastWatched(self, lastWatched):
 		self.lastWatched = lastWatched
 
-def open_connection():
+def open_connection(login, password):
+	md5_password = md5(password)
 	cj=cookielib.CookieJar()
 	# print "http://api.myshows.ru/profile/login?login=%(login)s&password=%(passwd)s" % {"login" :username, "passwd": my_password_md5.hexdigest()}
 	opener = urllib2.build_opener(urllib2.HTTPCookieProcessor(cj))
 	auth = opener.open("http://api.myshows.ru/profile/login?login=%(login)s&password=%(passwd)s " % \
-		{"login":username, "passwd": my_password_md5.hexdigest()} )
+		{"login":login, "passwd": md5_password.hexdigest()} )
 
 	# print auth.getcode() #надо бы его тоже возвращать
 
@@ -82,7 +83,25 @@ def create_structure(connection):
 # for index, cookie in enumerate(cj):
 #         print index, '  :  ', cookie
 
-connection = open_connection()
+
+secure = open('key', 'r')
+for line in secure:
+	try:
+		if line.startswith('username='):
+			username=line[line.index("\'"):line.rindex("\'")]
+		elif line.startswith('password='):
+			password=line[line.index("\'"):line.rindex("\'")]
+		elif line.startswith("#"):
+			pass
+		else:
+			print ('Error! Cannot parse key file!')
+	except Exception, e:
+		raise e
+
+
+secure.close()		
+
+connection = open_connection(username, password)
 create_structure(connection)
 items = Element('items')
 user_input = "{query}"
