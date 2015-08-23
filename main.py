@@ -88,9 +88,9 @@ secure = open('key', 'r')
 for line in secure:
 	try:
 		if line.startswith('username='):
-			username=line[line.index("\'"):line.rindex("\'")]
+			username=line[line.index("\'")+1:line.rindex("\'")]
 		elif line.startswith('password='):
-			password=line[line.index("\'"):line.rindex("\'")]
+			password=line[line.index("\'")+1:line.rindex("\'")]
 		elif line.startswith("#"):
 			pass
 		else:
@@ -120,9 +120,9 @@ if user_input == "":
 			icon.text = "myshows.ico"
 else:
 	for show in shows_list:
-		if user_input.lower() == str(show.title.encode("utf-8")).lower()): 
+		if user_input.lower() == str(show.title.lower().encode("utf-8")): 
 			#введеное имя полностью совпадает с именем сериала - надо выводить самые старые непрсмотренные серии
-
+			pass
 		elif (str(show.title.encode("utf-8")).lower().startswith(user_input.lower()) == True or user_input.lower() in str(show.title.encode("utf-8")).lower()) and show.watchStatus == "watching":
 			item = SubElement(items, "item", {'arg': str(show.showId), "valid":"no", "autocomplete":show.title, "type":"default"})
 			title = SubElement(item, "title")
