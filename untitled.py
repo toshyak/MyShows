@@ -8,6 +8,9 @@ import json
 from xml.dom import minidom
 import datetime
 
+#TODO 
+
+
 my_password='xJ":vQ"&%`f!w@T/rixb@q,1l'
 username = 'Toshyak'
 
@@ -98,7 +101,10 @@ if user_input == "":
 			icon.text = "myshows.ico"
 else:
 	for show in shows_list:
-		if (str(show.title.encode("utf-8")).lower().startswith(user_input.lower()) == True or user_input.lower() in str(show.title.encode("utf-8")).lower()) and show.watchStatus == "watching":
+		if user_input.lower() == str(show.title.encode("utf-8")).lower()): 
+			#введеное имя полностью совпадает с именем сериала - надо выводить самые старые непрсмотренные серии
+
+		elif (str(show.title.encode("utf-8")).lower().startswith(user_input.lower()) == True or user_input.lower() in str(show.title.encode("utf-8")).lower()) and show.watchStatus == "watching":
 			item = SubElement(items, "item", {'arg': str(show.showId), "valid":"no", "autocomplete":show.title, "type":"default"})
 			title = SubElement(item, "title")
 			title.text = show.title
@@ -109,7 +115,9 @@ else:
 				subtitle.text = show.ruTitle + " " + show.lastWatched.strftime("%d.%m.%Y")
 			icon = SubElement(item, "icon")
 			icon.text = "myshows.ico"
-print tostring(items, 'utf-8') 
+print tostring(items, 'utf-8')
+
+
 
 # print """
 # <?xml version="1.0"?>
