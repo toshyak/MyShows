@@ -10,11 +10,6 @@ import datetime
 
 #TODO список файлов для сериала, его сортировка, возврат отсортированных непросмотренных серий
 
-#my_password=''
-#username = 'Toshyak'
-#now read login and password from separate file 'key', add it to .gitignore
-
-
 user_input = ""
 username = ""
 password = ""
@@ -154,6 +149,8 @@ else:
 				subtitle.text = "s" + str(episode.season)+"e"+str(episode.number)
 				icon = SubElement(item, "icon")
 				icon.text = "myshows.ico"
+				cmd_subtitle = SubElement(item, "subtitle", {"mod": "cmd"})
+				cmd_subtitle.text = "Mark as watched"
 		elif (str(show.title.encode("utf-8")).lower().startswith(user_input.lower()) == True or user_input.lower() in str(show.title.encode("utf-8")).lower()) and show.watchStatus == "watching":
 			item = SubElement(items, "item", {'arg': str(show.id), "valid":"no", "autocomplete":show.title, "type":"default"})
 			title = SubElement(item, "title")
