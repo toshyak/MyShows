@@ -22,20 +22,41 @@ shows_list = []
 
 class Show(object):
 	"""class for shows from myShows.ru"""
-	def __init__(self, showId, title, watchStatus, watchedEpisodes, totalEpisodes):
-		self.showId = showId
+	def __init__(self, id, title, watchStatus, watchedEpisodes, totalEpisodes):
+		self.id = id
 		self.title = title
 		self.watchStatus = watchStatus
 		self.watchedEpisodes = int(watchedEpisodes)
 		self.totalEpisodes = int(totalEpisodes)
 		self.ruTitle = None
 		self.lastWatched = None
+		self.seasons = []
 
 	def set_ruTitle(self, ruTitle):
 		self.ruTitle = ruTitle
 
 	def set_lastWatched(self, lastWatched):
 		self.lastWatched = lastWatched
+
+# 	def addSeason(self, season):
+# 		self.seasons.append(season)
+
+# class Season(object):
+# 	"""class for every Season"""
+# 	def __init__(self, show):
+# 		self.show = show
+# 		show.addSeason(self)
+		
+class Episode(object):
+	"""docstring for Episode"""
+	def __init__(self, id, show, season, number, title, airDate):
+		self.id = id
+		self.show = show
+		self.season = season
+		self.number = number
+		self.title = title
+		self.airDate = airDate
+		
 
 def open_connection(login, password):
 	md5_password = md5(password)
@@ -50,7 +71,7 @@ def open_connection(login, password):
 	return opener
 
 def last_watched(connection, show):
-	url = "http://api.myshows.ru/profile/shows/" + str(show.showId) + "/"
+	url = "http://api.myshows.ru/profile/shows/" + str(show.id) + "/"
 	episodes_json = json.load(connection.open(url))
 	last_watched = datetime.datetime(1,1,1)
 	for episode_id in episodes_json:
@@ -80,10 +101,6 @@ def create_structure(connection):
 	for show in shows_not_watching:
 		shows_list.append(show)
 
-# for index, cookie in enumerate(cj):
-#         print index, '  :  ', cookie
-
-
 secure = open('key', 'r')
 for line in secure:
 	try:
@@ -108,7 +125,7 @@ user_input = "{query}"
 if user_input == "":
 	for show in shows_list:
 		if show.watchStatus == "watching":
-			item = SubElement(items, "item", {'arg': str(show.showId), "valid":"no", "autocomplete":show.title, "type":"default"})
+			item = SubElement(items, "item", {'arg': str(show.id), "valid":"no", "autocomplete":show.title, "type":"default"})
 			title = SubElement(item, "title")
 			title.text = show.title
 			subtitle = SubElement(item, "subtitle")
@@ -120,11 +137,25 @@ if user_input == "":
 			icon.text = "myshows.ico"
 else:
 	for show in shows_list:
-		if user_input.lower() == str(show.title.lower().encode("utf-8")): 
+		if user_input.lower() == str(show.title.lower().encode("utf-8")):
 			#введеное имя полностью совпадает с именем сериала - надо выводить самые старые непрсмотренные серии
-			pass
+			unwatched_episodes = []
+			unwatched_json=json.load(connection.open("http://api.myshows.ru/profile/episodes/unwatched/"))
+			for episode_id in unwatched_json:
+				if unwatched_json[episode_id]["showId"]==show.id:
+					unwatched_episodes.append(Episode(unwatched_json[episode_id]["episodeId"], show, unwatched_json[episode_id]["seasonNumber"], unwatched_json[episode_id]["episodeNumber"], unwatched_json[episode_id]["title"], datetime.datetime.strptime(unwatched_json[episode_id]["airDate"], "%d.%m.%Y")))
+
+			unwatched_sorted = 	sorted(unwatched_episodes, key = lambda episode: episode.airDate, reverse=False)
+			for episode in unwatched_sorted:
+				item = SubElement(items, "item", {'arg': str(episode.id), "valid": "yes", "autocomplete":"s"+str(episode.season)+"e"+str(episode.number),"type":"default"})
+				title = SubElement(item, "title")
+				title.text = episode.title
+				subtitle = SubElement(item, "subtitle")
+				subtitle.text = "s" + str(episode.season)+"e"+str(episode.number)
+				icon = SubElement(item, "icon")
+				icon.text = "myshows.ico"
 		elif (str(show.title.encode("utf-8")).lower().startswith(user_input.lower()) == True or user_input.lower() in str(show.title.encode("utf-8")).lower()) and show.watchStatus == "watching":
-			item = SubElement(items, "item", {'arg': str(show.showId), "valid":"no", "autocomplete":show.title, "type":"default"})
+			item = SubElement(items, "item", {'arg': str(show.id), "valid":"no", "autocomplete":show.title, "type":"default"})
 			title = SubElement(item, "title")
 			title.text = show.title
 			subtitle = SubElement(item, "subtitle")
